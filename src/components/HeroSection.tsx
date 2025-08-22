@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, Building } from "lucide-react";
-import heroImage from "@/assets/valencia-city-proper.jpg";
+import heroImage from "@/assets/valencia-artes.jpg";
 
 const HeroSection = () => {
   return (
