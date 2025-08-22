@@ -9,8 +9,8 @@ const HeroSection = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={heroImage} 
-          alt="Valencia Digital Ecosystem" 
+          src="/lovable-uploads/4e3f2d95-6fc0-4490-a937-4cf00f2db14e.png" 
+          alt="Centro Histórico de Valencia" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/60 to-secondary/40"></div>
