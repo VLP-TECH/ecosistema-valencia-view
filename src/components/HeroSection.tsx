@@ -21,7 +21,7 @@ const HeroSection = () => {
         <div className="space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
-              Ecosistema Digital
+              Ecosistema digital
               <span className="block bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
                 Comunidad Valenciana
               </span>
@@ -34,11 +34,11 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="hero" size="lg" className="text-lg px-8 py-4">
               <BarChart3 className="mr-2 h-5 w-5" />
-              Explorar Dashboard
+              Explorar dashboard
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white/30 text-white hover:bg-white hover:text-primary">
               <Users className="mr-2 h-5 w-5" />
-              Participar en Encuesta
+              Participar en encuesta
             </Button>
           </div>
 
@@ -47,7 +47,7 @@ const HeroSection = () => {
             <Card className="bg-card/10 backdrop-blur-sm border-white/20 p-6 text-center hover:bg-card/20 transition-all duration-300">
               <Building className="h-8 w-8 text-secondary mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-white">2,500+</h3>
-              <p className="text-white/80">Empresas Digitales</p>
+              <p className="text-white/80">Empresas digitales</p>
             </Card>
 
             <Card className="bg-card/10 backdrop-blur-sm border-white/20 p-6 text-center hover:bg-card/20 transition-all duration-300">
@@ -59,13 +59,13 @@ const HeroSection = () => {
             <Card className="bg-card/10 backdrop-blur-sm border-white/20 p-6 text-center hover:bg-card/20 transition-all duration-300">
               <TrendingUp className="h-8 w-8 text-success mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-white">15.2%</h3>
-              <p className="text-white/80">Crecimiento Anual</p>
+              <p className="text-white/80">Crecimiento anual</p>
             </Card>
 
             <Card className="bg-card/10 backdrop-blur-sm border-white/20 p-6 text-center hover:bg-card/20 transition-all duration-300">
               <BarChart3 className="h-8 w-8 text-warning mx-auto mb-3" />
               <h3 className="text-2xl font-bold text-white">€8.5B</h3>
-              <p className="text-white/80">Facturación Digital</p>
+              <p className="text-white/80">Facturación digital</p>
             </Card>
           </div>
         </div>
