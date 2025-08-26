@@ -96,62 +96,6 @@ const DataSourcesSection = () => {
           </p>
         </div>
 
-        {/* Data Sources */}
-        <div className="mb-16">
-          <h3 className="text-2xl font-semibold text-foreground mb-8 flex items-center">
-            <Database className="h-6 w-6 mr-3 text-primary" />
-            Fuentes de Datos Conectadas
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {dataSources.map((source) => (
-              <Card key={source.name} className="p-6 hover:shadow-medium transition-all duration-300 bg-gradient-card border-0">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${source.color}`}>
-                    <source.icon className="h-6 w-6" />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {source.status === 'active' ? (
-                      <CheckCircle className="h-5 w-5 text-success" />
-                    ) : (
-                      <AlertCircle className="h-5 w-5 text-warning" />
-                    )}
-                    <Badge variant={source.status === 'active' ? 'default' : 'secondary'}>
-                      {source.status === 'active' ? 'Activo' : 'Mantenimiento'}
-                    </Badge>
-                  </div>
-                </div>
-
-                <h4 className="text-lg font-semibold text-foreground mb-2">{source.name}</h4>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Tipo: {source.type} • Frecuencia: {source.frequency}
-                </p>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Indicadores:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {source.indicators.map((indicator) => (
-                        <Badge key={indicator} variant="outline" className="text-xs">
-                          {indicator}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <span className="text-sm text-muted-foreground">
-                      Última actualización: {new Date(source.lastUpdate).toLocaleDateString('es-ES')}
-                    </span>
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
 
         {/* Integration Methods */}
         <div className="mb-12">
