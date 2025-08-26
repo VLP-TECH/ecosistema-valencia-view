@@ -97,43 +97,6 @@ const DataSourcesSection = () => {
         </div>
 
 
-        {/* Integration Methods */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-semibold text-foreground mb-8 flex items-center">
-            <RefreshCw className="h-6 w-6 mr-3 text-accent" />
-            Métodos de Integración
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {integrationMethods.map((method) => (
-              <Card key={method.title} className="p-6 text-center hover:shadow-medium transition-all duration-300 bg-gradient-card border-0">
-                <h4 className="text-lg font-semibold text-foreground mb-3">{method.title}</h4>
-                <p className="text-muted-foreground text-sm mb-4">{method.description}</p>
-                
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-xs font-medium text-foreground mb-2">Tecnologías:</p>
-                    <div className="space-y-1">
-                      {method.technologies.map((tech) => (
-                        <Badge key={tech} variant="outline" className="text-xs block">
-                          {tech}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <Badge 
-                    variant={method.status === 'Implementado' ? 'default' : 
-                            method.status === 'En desarrollo' ? 'secondary' : 'outline'}
-                    className="mt-3"
-                  >
-                    {method.status}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
 
         {/* Technical Architecture */}
         <Card className="p-8 bg-gradient-card border-0">
