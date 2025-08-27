@@ -1,15 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Menu, X, BarChart3, FileText, MessageSquare, Database, LogOut } from "lucide-react";
+import { Menu, X, BarChart3, FileText, MessageSquare, Database, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 const NavigationHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      checkUserRole();
+    }
+  }, [user]);
+
+  const checkUserRole = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) throw error;
+      setUserRole(data.role);
+    } catch (error) {
+      console.error('Error checking user role:', error);
+    }
+  };
 
   const menuItems = [
     { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
@@ -79,6 +102,17 @@ const NavigationHeader = () => {
                 Hola, {user.user_metadata?.first_name || user.email}
               </span>
             )}
+            {userRole === 'admin' && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="flex items-center space-x-2"
+              >
+                <Shield className="h-4 w-4" />
+                <span>Admin</span>
+              </Button>
+            )}
             <Button variant="outline" size="sm">
               Participar
             </Button>
@@ -127,6 +161,20 @@ const NavigationHeader = () => {
                 <div className="text-sm text-muted-foreground px-3 py-2">
                   Hola, {user.user_metadata?.first_name || user.email}
                 </div>
+              )}
+              {userRole === 'admin' && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full flex items-center space-x-2"
+                  onClick={() => {
+                    navigate('/admin');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <Shield className="h-4 w-4" />
+                  <span>Admin</span>
+                </Button>
               )}
               <Button variant="outline" size="sm" className="w-full">
                 Participar
