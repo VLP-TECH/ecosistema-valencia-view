@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          active: boolean | null
           avatar_url: string | null
           created_at: string
           first_name: string | null
@@ -27,6 +28,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active?: boolean | null
           avatar_url?: string | null
           created_at?: string
           first_name?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active?: boolean | null
           avatar_url?: string | null
           created_at?: string
           first_name?: string | null
@@ -55,7 +58,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
