@@ -4,8 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Users, UserCheck, UserX, Shield } from 'lucide-react';
+import { Users, UserCheck, UserX, Shield, Plus, Edit } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
@@ -24,6 +28,15 @@ const AdminDashboard = () => {
   const { profile, loading, isAdmin, isActive } = useUserProfile();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    organization: '',
+    role: 'user'
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -101,6 +114,144 @@ const AdminDashboard = () => {
     }
   };
 
+  const createUser = async () => {
+    if (!newUser.email || !newUser.password || !newUser.firstName) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos obligatorios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Create user using Supabase admin API
+      const { data, error } = await supabase.auth.signUp({
+        email: newUser.email,
+        password: newUser.password,
+        options: {
+          data: {
+            first_name: newUser.firstName,
+            last_name: newUser.lastName,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // Update the profile with additional info
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            organization: newUser.organization,
+            role: newUser.role,
+            active: true
+          })
+          .eq('user_id', data.user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Usuario creado correctamente",
+      });
+      
+      setShowCreateUser(false);
+      setNewUser({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        organization: '',
+        role: 'user'
+      });
+      fetchProfiles();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo crear el usuario",
+        variant: "destructive",
+      });
+      console.error('Error creating user:', error);
+    }
+  };
+
+  const createDemoUsers = async () => {
+    const demoUsers = [
+      {
+        email: 'usuario@camaravalencia.es',
+        password: '123456',
+        firstName: 'Juan',
+        lastName: 'Pérez',
+        organization: 'Cámara Valencia',
+        role: 'user'
+      },
+      {
+        email: 'editor@camaravalencia.es',
+        password: '123456',
+        firstName: 'Ana',
+        lastName: 'García',
+        organization: 'Cámara Valencia',
+        role: 'editor'
+      },
+      {
+        email: 'admin2@camaravalencia.es',
+        password: '123456',
+        firstName: 'Carlos',
+        lastName: 'López',
+        organization: 'Cámara Valencia',
+        role: 'admin'
+      }
+    ];
+
+    try {
+      for (const user of demoUsers) {
+        const { data, error } = await supabase.auth.signUp({
+          email: user.email,
+          password: user.password,
+          options: {
+            data: {
+              first_name: user.firstName,
+              last_name: user.lastName,
+            }
+          }
+        });
+
+        if (error) {
+          console.error(`Error creating user ${user.email}:`, error);
+          continue;
+        }
+
+        if (data.user) {
+          await supabase
+            .from('profiles')
+            .update({
+              organization: user.organization,
+              role: user.role,
+              active: true
+            })
+            .eq('user_id', data.user.id);
+        }
+      }
+
+      toast({
+        title: "Éxito",
+        description: "Usuarios demo creados correctamente",
+      });
+      
+      fetchProfiles();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Error al crear usuarios demo",
+        variant: "destructive",
+      });
+      console.error('Error creating demo users:', error);
+    }
+  };
+
   if (loading || loadingProfiles) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -120,21 +271,112 @@ const AdminDashboard = () => {
   const activeUsers = profiles.filter(p => p.active).length;
   const pendingUsers = profiles.filter(p => !p.active).length;
   const adminUsers = profiles.filter(p => p.role === 'admin').length;
+  const editorUsers = profiles.filter(p => p.role === 'editor').length;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Dashboard de Administración
-          </h1>
-          <p className="text-muted-foreground">
-            Gestiona usuarios y permisos de acceso al sistema
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Dashboard de Administración
+              </h1>
+              <p className="text-muted-foreground">
+                Gestiona usuarios y permisos de acceso al sistema
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Dialog open={showCreateUser} onOpenChange={setShowCreateUser}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Usuario
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="firstName">Nombre *</Label>
+                        <Input
+                          id="firstName"
+                          value={newUser.firstName}
+                          onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="lastName">Apellidos</Label>
+                        <Input
+                          id="lastName"
+                          value={newUser.lastName}
+                          onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Contraseña *</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="organization">Organización</Label>
+                      <Input
+                        id="organization"
+                        value={newUser.organization}
+                        onChange={(e) => setNewUser({...newUser, organization: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="role">Rol</Label>
+                      <Select value={newUser.role} onValueChange={(value) => setNewUser({...newUser, role: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleccionar rol" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Usuario</SelectItem>
+                          <SelectItem value="editor">Editor</SelectItem>
+                          <SelectItem value="admin">Administrador</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setShowCreateUser(false)}>
+                      Cancelar
+                    </Button>
+                    <Button onClick={createUser}>
+                      Crear Usuario
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button variant="outline" onClick={createDemoUsers}>
+                <Users className="h-4 w-4 mr-2" />
+                Crear Usuarios Demo
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
@@ -162,6 +404,16 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">{pendingUsers}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Editores</CardTitle>
+              <Edit className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{editorUsers}</div>
             </CardContent>
           </Card>
 
@@ -205,8 +457,12 @@ const AdminDashboard = () => {
                       {userProfile.organization || 'No especificada'}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={userProfile.role === 'admin' ? 'default' : 'secondary'}>
-                        {userProfile.role === 'admin' ? 'Administrador' : 'Usuario'}
+                      <Badge variant={
+                        userProfile.role === 'admin' ? 'default' : 
+                        userProfile.role === 'editor' ? 'outline' : 'secondary'
+                      }>
+                        {userProfile.role === 'admin' ? 'Administrador' : 
+                         userProfile.role === 'editor' ? 'Editor' : 'Usuario'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -228,24 +484,20 @@ const AdminDashboard = () => {
                           {userProfile.active ? 'Desactivar' : 'Activar'}
                         </Button>
                         
-                        {userProfile.role !== 'admin' && userProfile.user_id !== profile?.user_id && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateUserRole(userProfile.user_id, 'admin')}
+                        {userProfile.user_id !== profile?.user_id && (
+                          <Select 
+                            value={userProfile.role} 
+                            onValueChange={(newRole) => updateUserRole(userProfile.user_id, newRole)}
                           >
-                            Hacer Admin
-                          </Button>
-                        )}
-                        
-                        {userProfile.role === 'admin' && userProfile.user_id !== profile?.user_id && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => updateUserRole(userProfile.user_id, 'user')}
-                          >
-                            Quitar Admin
-                          </Button>
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Usuario</SelectItem>
+                              <SelectItem value="editor">Editor</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
                         )}
                       </div>
                     </TableCell>
