@@ -19,17 +19,17 @@ const NavigationHeader = () => {
   ];
 
   const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
+    try {
+      await signOut();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente"
+      });
+    } catch (error) {
       toast({
         title: "Error",
         description: "No se pudo cerrar sesión",
         variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión exitosamente"
       });
     }
   };
