@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { usePermissions } from "@/hooks/usePermissions";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -15,6 +16,37 @@ import {
 } from "lucide-react";
 
 const DashboardSection = () => {
+  const { permissions, loading } = usePermissions();
+  
+  if (loading) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!permissions.canViewData) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              Acceso Restringido
+            </h2>
+            <p className="text-muted-foreground">
+              Tu cuenta necesita ser activada para ver los datos. Contacta con un administrador.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const indicators = [
     {
       title: "Índice DESI Valencia",
@@ -108,10 +140,12 @@ const DashboardSection = () => {
                 <GraduationCap className="h-5 w-5 mr-2 text-primary" />
                 Competencias Digitales
               </h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
-              </Button>
+              {permissions.canExportData && (
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar
+                </Button>
+              )}
             </div>
             <div className="space-y-4">
               {digitalSkills.map((skill) => (
@@ -133,10 +167,12 @@ const DashboardSection = () => {
                 <Wifi className="h-5 w-5 mr-2 text-accent" />
                 Conectividad Digital
               </h3>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
-              </Button>
+              {permissions.canExportData && (
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar
+                </Button>
+              )}
             </div>
             <div className="space-y-4">
               {connectivity.map((item) => (
@@ -165,10 +201,12 @@ const DashboardSection = () => {
               <BarChart3 className="mr-2 h-5 w-5" />
               Ver Dashboard Completo
             </Button>
-            <Button variant="outline" size="lg">
-              <Download className="mr-2 h-5 w-5" />
-              Descargar Informe
-            </Button>
+            {permissions.canDownloadReports && (
+              <Button variant="outline" size="lg">
+                <Download className="mr-2 h-5 w-5" />
+                Descargar Informe
+              </Button>
+            )}
             <Button variant="secondary" size="lg">
               <Smartphone className="mr-2 h-5 w-5" />
               App Móvil

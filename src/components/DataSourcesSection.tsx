@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { usePermissions } from "@/hooks/usePermissions";
 import { 
   Database, 
   Globe, 
@@ -9,10 +10,43 @@ import {
   CheckCircle,
   AlertCircle,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  Plus
 } from "lucide-react";
 
 const DataSourcesSection = () => {
+  const { permissions, loading } = usePermissions();
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!permissions.canViewData) {
+    return (
+      <section className="py-20 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
+              Acceso Restringido
+            </h2>
+            <p className="text-muted-foreground">
+              Tu cuenta necesita ser activada para ver los datos. Contacta con un administrador.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const dataSources = [
     {
       name: "Instituto Nacional de Estadística (INE)",
@@ -87,13 +121,83 @@ const DataSourcesSection = () => {
     <section id="data" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-foreground mb-4">
-            Fuentes de Datos e Integración
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Infraestructura técnica para la captura, procesamiento y almacenamiento automatizado 
-            de datos del ecosistema digital valenciano
-          </p>
+          <div className="flex flex-col lg:flex-row items-center justify-between mb-6">
+            <div className="text-left lg:flex-1">
+              <h2 className="text-4xl font-bold text-foreground mb-4">
+                Fuentes de Datos e Integración
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl">
+                Infraestructura técnica para la captura, procesamiento y almacenamiento automatizado 
+                de datos del ecosistema digital valenciano
+              </p>
+            </div>
+            {permissions.canUploadDataSources && (
+              <div className="mt-4 lg:mt-0">
+                <Button size="lg" className="mr-2">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Nueva Fuente
+                </Button>
+                <Button variant="outline" size="lg">
+                  <Upload className="mr-2 h-5 w-5" />
+                  Subir Datos
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Data Sources Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          {dataSources.map((source) => (
+            <Card key={source.name} className="p-6 hover:shadow-medium transition-all duration-300 bg-gradient-card border-0">
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-lg ${source.color}`}>
+                  <source.icon className="h-6 w-6" />
+                </div>
+                <div className="flex items-center space-x-2">
+                  {source.status === 'active' ? (
+                    <CheckCircle className="h-5 w-5 text-success" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-warning" />
+                  )}
+                  <Badge variant={source.status === 'active' ? 'default' : 'secondary'}>
+                    {source.status === 'active' ? 'Activo' : 'Mantenimiento'}
+                  </Badge>
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-foreground mb-2">{source.name}</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tipo: {source.type} • Actualización: {source.frequency}
+              </p>
+              
+              <div className="space-y-2 mb-4">
+                <div className="text-xs text-muted-foreground">
+                  Última actualización: {new Date(source.lastUpdate).toLocaleDateString('es-ES')}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {source.indicators.map((indicator) => (
+                    <Badge key={indicator} variant="outline" className="text-xs">
+                      {indicator}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Button variant="ghost" size="sm">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Ver detalles
+                </Button>
+                {permissions.canUploadDataSources && (
+                  <Button variant="outline" size="sm">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Actualizar
+                  </Button>
+                )}
+              </div>
+            </Card>
+          ))}
         </div>
 
 
