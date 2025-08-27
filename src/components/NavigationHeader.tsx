@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Menu, X, BarChart3, FileText, MessageSquare, Database } from "lucide-react";
+import { Menu, X, BarChart3, FileText, MessageSquare, Database, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 const NavigationHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const menuItems = [
     { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
@@ -12,6 +17,30 @@ const NavigationHeader = () => {
     { icon: MessageSquare, label: "Encuestas", href: "#surveys" },
     { icon: Database, label: "Datos Abiertos", href: "#data" },
   ];
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo cerrar sesión",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente"
+      });
+    }
+  };
+
+  const handleAuthAction = () => {
+    if (user) {
+      handleSignOut();
+    } else {
+      navigate('/auth');
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border/50">
@@ -45,11 +74,22 @@ const NavigationHeader = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center space-x-3">
+            {user && (
+              <span className="text-sm text-muted-foreground">
+                Hola, {user.user_metadata?.first_name || user.email}
+              </span>
+            )}
             <Button variant="outline" size="sm">
               Participar
             </Button>
-            <Button variant="default" size="sm">
-              Acceder
+            <Button 
+              variant={user ? "destructive" : "default"} 
+              size="sm"
+              onClick={handleAuthAction}
+              className="flex items-center space-x-2"
+            >
+              {user ? <LogOut className="h-4 w-4" /> : null}
+              <span>{user ? "Cerrar Sesión" : "Acceder"}</span>
             </Button>
           </div>
 
@@ -83,11 +123,22 @@ const NavigationHeader = () => {
               </Button>
             ))}
             <div className="pt-2 space-y-2 border-t border-border">
+              {user && (
+                <div className="text-sm text-muted-foreground px-3 py-2">
+                  Hola, {user.user_metadata?.first_name || user.email}
+                </div>
+              )}
               <Button variant="outline" size="sm" className="w-full">
                 Participar
               </Button>
-              <Button variant="default" size="sm" className="w-full">
-                Acceder
+              <Button 
+                variant={user ? "destructive" : "default"} 
+                size="sm" 
+                className="w-full flex items-center space-x-2"
+                onClick={handleAuthAction}
+              >
+                {user ? <LogOut className="h-4 w-4" /> : null}
+                <span>{user ? "Cerrar Sesión" : "Acceder"}</span>
               </Button>
             </div>
           </Card>
