@@ -27,10 +27,15 @@ const AdminDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (profile && isAdmin && isActive) {
-      fetchProfiles();
+    if (!loading) {
+      if (profile && isAdmin && isActive) {
+        fetchProfiles();
+      } else {
+        // Stop loading profiles if user is not admin or not active
+        setLoadingProfiles(false);
+      }
     }
-  }, [profile, isAdmin, isActive]);
+  }, [profile, isAdmin, isActive, loading]);
 
   const fetchProfiles = async () => {
     setLoadingProfiles(true);
