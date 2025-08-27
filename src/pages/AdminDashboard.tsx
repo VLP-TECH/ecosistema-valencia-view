@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { Users, UserCheck, UserX, Shield } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
-interface UserProfile {
+interface Profile {
   id: string;
   user_id: string;
   first_name: string | null;
@@ -21,190 +21,162 @@ interface UserProfile {
 }
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { profile, loading, isAdmin, isActive } = useUserProfile();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
   const { toast } = useToast();
-  const [userProfiles, setUserProfiles] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
-      checkUserRole();
-      fetchUsers();
+    if (profile && isAdmin && isActive) {
+      fetchProfiles();
     }
-  }, [user]);
+  }, [profile, isAdmin, isActive]);
 
-  const checkUserRole = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
+  const fetchProfiles = async () => {
+    setLoadingProfiles(true);
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUserRole(data.role);
-    } catch (error) {
-      console.error('Error checking user role:', error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setUserProfiles(data || []);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+    if (error) {
       toast({
         title: "Error",
         description: "No se pudieron cargar los usuarios",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      console.error('Error fetching profiles:', error);
+    } else {
+      setProfiles(data || []);
     }
+    setLoadingProfiles(false);
   };
 
-  const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ active: !currentStatus })
-        .eq('user_id', userId);
+  const toggleUserActive = async (userId: string, currentActive: boolean) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ active: !currentActive })
+      .eq('user_id', userId);
 
-      if (error) throw error;
-
-      setUserProfiles(prev => 
-        prev.map(user => 
-          user.user_id === userId 
-            ? { ...user, active: !currentStatus }
-            : user
-        )
-      );
-
-      toast({
-        title: "Estado actualizado",
-        description: `Usuario ${!currentStatus ? 'activado' : 'desactivado'} correctamente`,
-      });
-    } catch (error) {
-      console.error('Error updating user status:', error);
+    if (error) {
       toast({
         title: "Error",
         description: "No se pudo actualizar el estado del usuario",
         variant: "destructive",
       });
+      console.error('Error updating user status:', error);
+    } else {
+      toast({
+        title: "Éxito",
+        description: `Usuario ${!currentActive ? 'activado' : 'desactivado'} correctamente`,
+      });
+      fetchProfiles();
     }
   };
 
-  const changeUserRole = async (userId: string, newRole: 'admin' | 'user') => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('user_id', userId);
+  const updateUserRole = async (userId: string, newRole: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole })
+      .eq('user_id', userId);
 
-      if (error) throw error;
-
-      setUserProfiles(prev => 
-        prev.map(user => 
-          user.user_id === userId 
-            ? { ...user, role: newRole }
-            : user
-        )
-      );
-
-      toast({
-        title: "Rol actualizado",
-        description: `Usuario ahora es ${newRole}`,
-      });
-    } catch (error) {
-      console.error('Error updating user role:', error);
+    if (error) {
       toast({
         title: "Error",
         description: "No se pudo actualizar el rol del usuario",
         variant: "destructive",
       });
+      console.error('Error updating user role:', error);
+    } else {
+      toast({
+        title: "Éxito",
+        description: "Rol actualizado correctamente",
+      });
+      fetchProfiles();
     }
   };
 
-  if (!user || userRole !== 'admin') {
+  if (loading || loadingProfiles) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile || !isAdmin || !isActive) {
     return <Navigate to="/" replace />;
   }
 
-  const stats = {
-    total: userProfiles.length,
-    active: userProfiles.filter(u => u.active).length,
-    pending: userProfiles.filter(u => !u.active).length,
-    admins: userProfiles.filter(u => u.role === 'admin').length,
-  };
+  const totalUsers = profiles.length;
+  const activeUsers = profiles.filter(p => p.active).length;
+  const pendingUsers = profiles.filter(p => !p.active).length;
+  const adminUsers = profiles.filter(p => p.role === 'admin').length;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Dashboard Administrativo</h1>
-        <p className="text-muted-foreground">Gestiona usuarios y permisos del sistema</p>
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Dashboard de Administración
+          </h1>
+          <p className="text-muted-foreground">
+            Gestiona usuarios y permisos de acceso al sistema
+          </p>
+        </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Activos</CardTitle>
-            <UserCheck className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
-            <UserX className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.pending}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Administradores</CardTitle>
-            <Shield className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.admins}</div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalUsers}</div>
+            </CardContent>
+          </Card>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestión de Usuarios</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
+              <UserCheck className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{activeUsers}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
+              <UserX className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{pendingUsers}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Administradores</CardTitle>
+              <Shield className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{adminUsers}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabla de usuarios */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Gestión de Usuarios</CardTitle>
+          </CardHeader>
+          <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -212,59 +184,60 @@ const AdminDashboard = () => {
                   <TableHead>Organización</TableHead>
                   <TableHead>Rol</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead>Registro</TableHead>
+                  <TableHead>Fecha Registro</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {userProfiles.map((profile) => (
-                  <TableRow key={profile.id}>
+                {profiles.map((userProfile) => (
+                  <TableRow key={userProfile.id}>
                     <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {profile.first_name} {profile.last_name}
-                        </div>
-                      </div>
+                      {userProfile.first_name && userProfile.last_name
+                        ? `${userProfile.first_name} ${userProfile.last_name}`
+                        : 'Sin nombre'}
                     </TableCell>
                     <TableCell>
-                      {profile.organization || 'No especificada'}
+                      {userProfile.organization || 'No especificada'}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={profile.role === 'admin' ? 'default' : 'secondary'}>
-                        {profile.role}
+                      <Badge variant={userProfile.role === 'admin' ? 'default' : 'secondary'}>
+                        {userProfile.role === 'admin' ? 'Administrador' : 'Usuario'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={profile.active ? 'default' : 'destructive'}>
-                        {profile.active ? 'Activo' : 'Inactivo'}
+                      <Badge variant={userProfile.active ? 'default' : 'destructive'}>
+                        {userProfile.active ? 'Activo' : 'Inactivo'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(profile.created_at).toLocaleDateString()}
+                      {new Date(userProfile.created_at).toLocaleDateString('es-ES')}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          variant={profile.active ? "destructive" : "default"}
-                          onClick={() => toggleUserStatus(profile.user_id, profile.active)}
+                          variant={userProfile.active ? "destructive" : "default"}
+                          onClick={() => toggleUserActive(userProfile.user_id, userProfile.active)}
+                          disabled={userProfile.user_id === profile?.user_id}
                         >
-                          {profile.active ? 'Desactivar' : 'Activar'}
+                          {userProfile.active ? 'Desactivar' : 'Activar'}
                         </Button>
-                        {profile.role !== 'admin' && (
+                        
+                        {userProfile.role !== 'admin' && userProfile.user_id !== profile?.user_id && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => changeUserRole(profile.user_id, 'admin')}
+                            onClick={() => updateUserRole(userProfile.user_id, 'admin')}
                           >
                             Hacer Admin
                           </Button>
                         )}
-                        {profile.role === 'admin' && profile.user_id !== user?.id && (
+                        
+                        {userProfile.role === 'admin' && userProfile.user_id !== profile?.user_id && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => changeUserRole(profile.user_id, 'user')}
+                            onClick={() => updateUserRole(userProfile.user_id, 'user')}
                           >
                             Quitar Admin
                           </Button>
@@ -275,9 +248,9 @@ const AdminDashboard = () => {
                 ))}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
