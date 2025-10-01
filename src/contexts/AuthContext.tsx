@@ -72,9 +72,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Try to invalidate the session on the server (global)
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.warn('Global signOut error:', (error as any)?.message || error);
+      }
+    } finally {
+      // Always clear local session to handle cross-domain previews or missing server session
+      await supabase.auth.signOut({ scope: 'local' });
+      setSession(null);
+      setUser(null);
+    }
   };
-
   const value = {
     user,
     session,
