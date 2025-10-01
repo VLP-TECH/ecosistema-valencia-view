@@ -16,7 +16,7 @@ const NavigationHeader = () => {
   const menuItems = [
     { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
     { icon: FileText, label: "Informes", href: "#reports" },
-    { icon: MessageSquare, label: "Encuestas", href: "#surveys" },
+    { icon: MessageSquare, label: "Encuestas", href: "/encuestas" },
     { icon: Database, label: "Datos Abiertos", href: "#data" },
   ];
 
@@ -72,6 +72,7 @@ const NavigationHeader = () => {
                 variant="ghost"
                 size="sm"
                 className="flex items-center space-x-2 hover:bg-accent/10"
+                onClick={() => item.href.startsWith('/') ? navigate(item.href) : window.location.href = item.href}
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -97,7 +98,11 @@ const NavigationHeader = () => {
                 <span>Gestión de Usuarios</span>
               </Button>
             )}
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/encuestas')}
+            >
               Participar
             </Button>
             <Button 
@@ -134,7 +139,14 @@ const NavigationHeader = () => {
                 variant="ghost"
                 size="sm"
                 className="w-full justify-start space-x-2"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  if (item.href.startsWith('/')) {
+                    navigate(item.href);
+                  } else {
+                    window.location.href = item.href;
+                  }
+                  setIsMenuOpen(false);
+                }}
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -160,7 +172,15 @@ const NavigationHeader = () => {
                   <span>Gestión de Usuarios</span>
                 </Button>
               )}
-              <Button variant="outline" size="sm" className="w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => {
+                  navigate('/encuestas');
+                  setIsMenuOpen(false);
+                }}
+              >
                 Participar
               </Button>
               <Button 
