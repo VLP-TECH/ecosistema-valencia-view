@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const DashboardSection = () => {
-  const { permissions, loading } = usePermissions();
+  const { permissions, loading, roles } = usePermissions();
   
   if (loading) {
     return (
@@ -216,6 +216,53 @@ const DashboardSection = () => {
             Datos actualizados automáticamente • Última actualización: {new Date().toLocaleDateString('es-ES')}
           </p>
         </div>
+
+        {/* Admin Panel - Only visible for admins */}
+        {roles.isAdmin && (
+          <Card className="mt-12 p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-foreground mb-2 flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 mr-2 text-primary" />
+                Panel de Control de Administrador
+              </h3>
+              <p className="text-muted-foreground">
+                Funcionalidades avanzadas disponibles para administradores
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="p-4 hover:shadow-lg transition-all">
+                <Users className="h-8 w-8 text-primary mb-3" />
+                <h4 className="font-semibold text-foreground mb-2">Gestión de Usuarios</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Administra roles y permisos de usuarios
+                </p>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => window.location.href = '/admin'}>
+                  Acceder
+                </Button>
+              </Card>
+              <Card className="p-4 hover:shadow-lg transition-all">
+                <Download className="h-8 w-8 text-accent mb-3" />
+                <h4 className="font-semibold text-foreground mb-2">Exportación Masiva</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Exporta todos los datos del sistema
+                </p>
+                <Button variant="outline" size="sm" className="w-full">
+                  Exportar Todo
+                </Button>
+              </Card>
+              <Card className="p-4 hover:shadow-lg transition-all">
+                <Building className="h-8 w-8 text-secondary mb-3" />
+                <h4 className="font-semibold text-foreground mb-2">Fuentes de Datos</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Configura y gestiona fuentes de datos
+                </p>
+                <Button variant="outline" size="sm" className="w-full">
+                  Configurar
+                </Button>
+              </Card>
+            </div>
+          </Card>
+        )}
       </div>
     </section>
   );
