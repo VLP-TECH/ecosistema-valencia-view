@@ -110,7 +110,7 @@ const NavigationHeader = () => {
                 className="flex items-center space-x-2"
               >
                 <Shield className="h-4 w-4" />
-                <span>Admin</span>
+                <span>Gestión de Usuarios</span>
               </Button>
             )}
             <Button variant="outline" size="sm">
@@ -173,7 +173,7 @@ const NavigationHeader = () => {
                   }}
                 >
                   <Shield className="h-4 w-4" />
-                  <span>Admin</span>
+                  <span>Gestión de Usuarios</span>
                 </Button>
               )}
               <Button variant="outline" size="sm" className="w-full">
