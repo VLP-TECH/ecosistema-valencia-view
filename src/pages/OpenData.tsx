@@ -346,25 +346,6 @@ const OpenData = () => {
           </Tabs>
         </div>
 
-        {/* Download Section */}
-        <Card className="mt-12 bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="py-8">
-            <div className="text-center space-y-4">
-              <h3 className="text-xl font-bold">Descarga el Sistema Completo de Indicadores</h3>
-              <p className="text-muted-foreground">
-                Accede al archivo CSV con todos los KPIs, fórmulas y fuentes de datos
-              </p>
-              <Button
-                size="lg"
-                onClick={() => window.open('/data/indicadores-kpis.csv', '_blank')}
-                className="gap-2"
-              >
-                <Database className="h-5 w-5" />
-                Descargar CSV
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </main>
 
       <FooterSection />
