@@ -292,7 +292,7 @@ const KPIsDashboard = () => {
                   {/* Gráficos variados */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Gráfico de tarta - Distribución por tipo */}
-                    <Card className="p-6 bg-gradient-card border-0">
+                    <Card className="p-8 bg-gradient-card border-0">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
@@ -303,7 +303,7 @@ const KPIsDashboard = () => {
                           Exportar
                         </Button>
                       </div>
-                      <ResponsiveContainer width="100%" height={250}>
+                      <ResponsiveContainer width="100%" height={400}>
                         <PieChart>
                           <Pie
                             data={getPieChartData(dimensionKPIs)}
@@ -311,7 +311,7 @@ const KPIsDashboard = () => {
                             cy="50%"
                             labelLine={false}
                             label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                            outerRadius={60}
+                            outerRadius={80}
                             fill="#8884d8"
                             dataKey="value"
                           >
