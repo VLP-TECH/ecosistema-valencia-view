@@ -78,13 +78,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.warn('Global signOut error:', (error as any)?.message || error);
       }
+    } catch (e) {
+      console.warn('Global signOut exception:', e);
     } finally {
       // Always clear local session to handle cross-domain previews or missing server session
-      await supabase.auth.signOut({ scope: 'local' });
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch (e) {
+        console.warn('Local signOut exception:', e);
+      }
+      // Fallback: hard clear possible Supabase auth keys
+      try {
+        const toRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key) continue;
+          if (
+            key.startsWith('sb-') ||
+            key.includes('supabase') ||
+            key.includes('auth-token')
+          ) {
+            toRemove.push(key);
+          }
+        }
+        toRemove.forEach((k) => localStorage.removeItem(k));
+      } catch (e) {
+        console.warn('LocalStorage cleanup error:', e);
+      }
       setSession(null);
       setUser(null);
     }
   };
+
   const value = {
     user,
     session,
