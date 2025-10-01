@@ -182,13 +182,16 @@ const KPIsDashboard = () => {
   };
 
   const getPieChartData = (dimensionKPIs: KPI[]) => {
-    const statusCount = dimensionKPIs.reduce((acc, kpi) => {
-      const status = kpi.status === 'OK' ? 'Activo' : 'Inactivo';
-      acc[status] = (acc[status] || 0) + 1;
+    const subdimensionCount = dimensionKPIs.reduce((acc, kpi) => {
+      const subdim = kpi.subdimension || 'Otros';
+      acc[subdim] = (acc[subdim] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return Object.entries(statusCount).map(([name, value]) => ({ name, value }));
+    return Object.entries(subdimensionCount)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 subdimensiones
   };
 
   const getLineChartData = (dimensionKPIs: KPI[]) => {
@@ -287,12 +290,12 @@ const KPIsDashboard = () => {
 
                   {/* Gráficos variados */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Gráfico de tarta - Estado de KPIs */}
+                    {/* Gráfico de tarta - Distribución por tipo */}
                     <Card className="p-6 bg-gradient-card border-0">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
-                          Estado de KPIs
+                          Distribución por Categoría
                         </h3>
                         <Button variant="outline" size="sm">
                           <Download className="h-4 w-4 mr-2" />
@@ -315,7 +318,13 @@ const KPIsDashboard = () => {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'hsl(var(--card))', 
+                              border: '1px solid hsl(var(--border))',
+                              borderRadius: '8px'
+                            }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </Card>
