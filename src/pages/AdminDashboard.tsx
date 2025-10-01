@@ -179,79 +179,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const createDemoUsers = async () => {
-    const demoUsers = [
-      {
-        email: 'usuario@camaravalencia.es',
-        password: '123456',
-        firstName: 'Juan',
-        lastName: 'Pérez',
-        organization: 'Cámara Valencia',
-        role: 'user'
-      },
-      {
-        email: 'editor@camaravalencia.es',
-        password: '123456',
-        firstName: 'Ana',
-        lastName: 'García',
-        organization: 'Cámara Valencia',
-        role: 'editor'
-      },
-      {
-        email: 'admin2@camaravalencia.es',
-        password: '123456',
-        firstName: 'Carlos',
-        lastName: 'López',
-        organization: 'Cámara Valencia',
-        role: 'admin'
-      }
-    ];
-
-    try {
-      for (const user of demoUsers) {
-        const { data, error } = await supabase.auth.signUp({
-          email: user.email,
-          password: user.password,
-          options: {
-            data: {
-              first_name: user.firstName,
-              last_name: user.lastName,
-            }
-          }
-        });
-
-        if (error) {
-          console.error(`Error creating user ${user.email}:`, error);
-          continue;
-        }
-
-        if (data.user) {
-          await supabase
-            .from('profiles')
-            .update({
-              organization: user.organization,
-              role: user.role,
-              active: true
-            })
-            .eq('user_id', data.user.id);
-        }
-      }
-
-      toast({
-        title: "Éxito",
-        description: "Usuarios demo creados correctamente",
-      });
-      
-      fetchProfiles();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Error al crear usuarios demo",
-        variant: "destructive",
-      });
-      console.error('Error creating demo users:', error);
-    }
-  };
 
   if (loading || loadingProfiles) {
     return (
@@ -368,10 +295,6 @@ const AdminDashboard = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline" onClick={createDemoUsers}>
-                <Users className="h-4 w-4 mr-2" />
-                Crear Usuarios Demo
-              </Button>
             </div>
           </div>
         </div>
