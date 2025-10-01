@@ -145,7 +145,7 @@ const OpenData = () => {
             <Database className="h-12 w-12 text-primary" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-            Datos Abiertos del Ecosistema Digital Valenciano
+            Datos abiertos de Cámara de Valencia del ecosistema valenciano
           </h1>
           <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
             Sistema de indicadores para medir y gestionar el desarrollo del ecosistema digital de Valencia
