@@ -197,7 +197,7 @@ const DashboardSection = () => {
         {/* Action Buttons */}
         <div className="text-center space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="default" size="lg">
+            <Button variant="default" size="lg" onClick={() => window.location.href = '/kpis'}>
               <BarChart3 className="mr-2 h-5 w-5" />
               Ver Dashboard Completo
             </Button>
