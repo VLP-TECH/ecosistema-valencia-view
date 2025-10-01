@@ -1,38 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Menu, X, BarChart3, FileText, MessageSquare, Database, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const NavigationHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const { user, signOut } = useAuth();
+  const { roles } = usePermissions();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      checkUserRole();
-    }
-  }, [user]);
-
-  const checkUserRole = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (error) throw error;
-      setUserRole(data.role);
-    } catch (error) {
-      console.error('Error checking user role:', error);
-    }
-  };
 
   const menuItems = [
     { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
@@ -102,7 +81,7 @@ const NavigationHeader = () => {
                 Hola, {user.user_metadata?.first_name || user.email}
               </span>
             )}
-            {userRole === 'admin' && (
+            {roles.isAdmin && (
               <Button 
                 variant="outline" 
                 size="sm"
@@ -162,7 +141,7 @@ const NavigationHeader = () => {
                   Hola, {user.user_metadata?.first_name || user.email}
                 </div>
               )}
-              {userRole === 'admin' && (
+              {roles.isAdmin && (
                 <Button 
                   variant="outline" 
                   size="sm" 
