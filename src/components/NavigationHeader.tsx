@@ -27,6 +27,7 @@ const NavigationHeader = () => {
         title: "Sesión cerrada",
         description: "Has cerrado sesión exitosamente"
       });
+      window.location.href = '/';
     } catch (error) {
       toast({
         title: "Error",
