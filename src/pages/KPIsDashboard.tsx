@@ -18,6 +18,21 @@ import {
   Download,
   ArrowUpRight
 } from "lucide-react";
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
+} from "recharts";
 
 interface KPI {
   dimension: string;
@@ -166,6 +181,25 @@ const KPIsDashboard = () => {
     return kpis.filter(kpi => kpi.dimension === dimensionId);
   };
 
+  const getPieChartData = (dimensionKPIs: KPI[]) => {
+    const statusCount = dimensionKPIs.reduce((acc, kpi) => {
+      const status = kpi.status === 'OK' ? 'Activo' : 'Inactivo';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(statusCount).map(([name, value]) => ({ name, value }));
+  };
+
+  const getLineChartData = (dimensionKPIs: KPI[]) => {
+    return dimensionKPIs.slice(0, 6).map((kpi, idx) => ({
+      name: `KPI ${idx + 1}`,
+      valor: kpi.status === 'OK' ? Math.floor(Math.random() * 30) + 70 : Math.floor(Math.random() * 40) + 30,
+    }));
+  };
+
+  const COLORS = ['hsl(var(--success))', 'hsl(var(--warning))', 'hsl(var(--destructive))', 'hsl(var(--accent))'];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -251,64 +285,107 @@ const KPIsDashboard = () => {
                     ))}
                   </div>
 
-                  {/* Lista de indicadores con Progress */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Gráficos variados */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Gráfico de tarta - Estado de KPIs */}
                     <Card className="p-6 bg-gradient-card border-0">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
-                          Indicadores Principales
+                          Estado de KPIs
                         </h3>
                         <Button variant="outline" size="sm">
                           <Download className="h-4 w-4 mr-2" />
                           Exportar
                         </Button>
                       </div>
-                      <div className="space-y-4">
-                        {dimensionKPIs.slice(0, 6).map((kpi, idx) => (
-                          <div key={idx} className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-foreground font-medium line-clamp-1">
-                                {kpi.indicator}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {kpi.importance || 'N/A'}
-                              </span>
-                            </div>
-                            <Progress value={kpi.status === 'OK' ? 75 : 45} className="h-2" />
-                          </div>
-                        ))}
-                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                          <Pie
+                            data={getPieChartData(dimensionKPIs)}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {getPieChartData(dimensionKPIs).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </Card>
 
-                    <Card className="p-6 bg-gradient-card border-0">
+                    {/* Gráfico de líneas - Evolución */}
+                    <Card className="p-6 bg-gradient-card border-0 lg:col-span-2">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <TrendingUp className={`h-5 w-5 mr-2 ${dimension.color}`} />
-                          Indicadores Secundarios
+                          Rendimiento de Indicadores
                         </h3>
                         <Button variant="outline" size="sm">
                           <Download className="h-4 w-4 mr-2" />
                           Exportar
                         </Button>
                       </div>
-                      <div className="space-y-4">
-                        {dimensionKPIs.slice(6, 12).map((kpi, idx) => (
-                          <div key={idx} className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-foreground font-medium line-clamp-1">
-                                {kpi.indicator}
-                              </span>
-                              <span className="text-muted-foreground">
-                                {kpi.frequency || 'N/A'}
-                              </span>
-                            </div>
-                            <Progress value={kpi.status === 'OK' ? 65 : 35} className="h-2" />
-                          </div>
-                        ))}
-                      </div>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <AreaChart data={getLineChartData(dimensionKPIs)}>
+                          <defs>
+                            <linearGradient id={`color-${dimension.id}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                          <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                          <YAxis stroke="hsl(var(--muted-foreground))" />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: 'hsl(var(--card))', 
+                              border: '1px solid hsl(var(--border))',
+                              borderRadius: '8px'
+                            }}
+                          />
+                          <Area 
+                            type="monotone" 
+                            dataKey="valor" 
+                            stroke="hsl(var(--primary))" 
+                            fillOpacity={1} 
+                            fill={`url(#color-${dimension.id})`}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </Card>
                   </div>
+
+                  {/* Lista con barras de progreso - Solo algunos indicadores */}
+                  <Card className="p-6 bg-gradient-card border-0">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-semibold text-foreground flex items-center">
+                        <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
+                        Indicadores Destacados
+                      </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {dimensionKPIs.slice(0, 6).map((kpi, idx) => (
+                        <div key={idx} className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-foreground font-medium line-clamp-1">
+                              {kpi.indicator}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {kpi.importance || 'N/A'}
+                            </span>
+                          </div>
+                          <Progress value={kpi.status === 'OK' ? 75 : 45} className="h-2" />
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
 
                   {/* Detalles de todos los indicadores */}
                   <div>
