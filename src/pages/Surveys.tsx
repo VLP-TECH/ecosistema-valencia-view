@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Calendar, Users } from "lucide-react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { FileText, Calendar, Users, Plus } from "lucide-react";
 import { toast } from "sonner";
 import NavigationHeader from "@/components/NavigationHeader";
 import FooterSection from "@/components/FooterSection";
@@ -21,6 +22,7 @@ const Surveys = () => {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { permissions } = usePermissions();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,9 +63,21 @@ const Surveys = () => {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 mt-8">
         <div className="space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Encuestas disponibles
-            </h1>
+            <div className="flex items-center justify-center gap-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
+                Encuestas disponibles
+              </h1>
+              {permissions.canUploadDataSources && (
+                <Button
+                  onClick={() => navigate("/encuestas/crear")}
+                  size="lg"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Crear encuesta
+                </Button>
+              )}
+            </div>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Participa en las encuestas del ecosistema digital valenciano
             </p>

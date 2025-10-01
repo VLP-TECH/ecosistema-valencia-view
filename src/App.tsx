@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import Surveys from "./pages/Surveys";
 import SurveyForm from "./pages/SurveyForm";
+import CreateSurvey from "./pages/CreateSurvey";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/encuestas" element={<Surveys />} />
+            <Route path="/encuestas/crear" element={<CreateSurvey />} />
             <Route path="/encuestas/:id" element={<SurveyForm />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
