@@ -14,7 +14,7 @@ const NavigationHeader = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
+    { icon: BarChart3, label: "Dashboard", href: "/dashboard" },
     { icon: FileText, label: "Informes", href: "#reports" },
     { icon: MessageSquare, label: "Encuestas", href: "/encuestas" },
     { icon: Database, label: "Datos Abiertos", href: "/datos-abiertos" },
