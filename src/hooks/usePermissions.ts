@@ -11,7 +11,7 @@ export const usePermissions = () => {
   const canDownloadReports = isAdmin || isEditor;
   const canUploadDataSources = isAdmin || isEditor;
   const canManageUsers = isAdmin;
-  const canViewData = profile?.active || false;
+  const canViewData = isAdmin || profile?.active || false;
   const canAccessAdminPanel = isAdmin;
   
   return {
