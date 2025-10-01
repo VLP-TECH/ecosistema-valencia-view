@@ -1,20 +1,17 @@
-# Imagen base
-FROM node:18-alpine
-
-# Directorio de trabajo
+# Build
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Copiamos package.json y package-lock.json
 COPY package*.json ./
-
-# Instalamos dependencias
-RUN npm install
-
-# Copiamos el resto del proyecto
+RUN npm ci
 COPY . .
+RUN npm run build
 
-# Puerto en el que se ejecutará la app (ajústalo según el framework)
-EXPOSE 3000
-
-# Comando para desarrollo (puedes cambiarlo por build/start si es prod)
-CMD ["npm", "run", "dev"]
+# Run
+FROM node:18-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 4173
+CMD ["npm","run","start"]
