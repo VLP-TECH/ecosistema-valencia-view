@@ -292,7 +292,7 @@ const KPIsDashboard = () => {
                   {/* Gráficos variados */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Gráfico de tarta - Distribución por tipo */}
-                    <Card className="p-8 bg-gradient-card border-0">
+                    <Card className="p-8 bg-gradient-card border-0 lg:col-span-2">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
@@ -331,7 +331,7 @@ const KPIsDashboard = () => {
                     </Card>
 
                     {/* Gráfico de líneas - Evolución */}
-                    <Card className="p-6 bg-gradient-card border-0 lg:col-span-2">
+                    <Card className="p-6 bg-gradient-card border-0">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <TrendingUp className={`h-5 w-5 mr-2 ${dimension.color}`} />
