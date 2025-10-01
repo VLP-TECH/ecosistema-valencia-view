@@ -195,9 +195,10 @@ const KPIsDashboard = () => {
   };
 
   const getLineChartData = (dimensionKPIs: KPI[]) => {
-    return dimensionKPIs.slice(0, 6).map((kpi, idx) => ({
-      name: `KPI ${idx + 1}`,
-      valor: kpi.status === 'OK' ? Math.floor(Math.random() * 30) + 70 : Math.floor(Math.random() * 40) + 30,
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, idx) => ({
+      name: `${currentYear - 5 + idx}`,
+      inversion: Math.floor(Math.random() * 500) + 200,
     }));
   };
 
@@ -334,7 +335,7 @@ const KPIsDashboard = () => {
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-foreground flex items-center">
                           <TrendingUp className={`h-5 w-5 mr-2 ${dimension.color}`} />
-                          Rendimiento de Indicadores
+                          Volumen de Inversión por Startup
                         </h3>
                         <Button variant="outline" size="sm">
                           <Download className="h-4 w-4 mr-2" />
@@ -361,10 +362,11 @@ const KPIsDashboard = () => {
                           />
                           <Area 
                             type="monotone" 
-                            dataKey="valor" 
+                            dataKey="inversion" 
                             stroke="hsl(var(--primary))" 
                             fillOpacity={1} 
                             fill={`url(#color-${dimension.id})`}
+                            name="Inversión (M€)"
                           />
                         </AreaChart>
                       </ResponsiveContainer>
