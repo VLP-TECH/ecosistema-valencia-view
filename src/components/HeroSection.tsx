@@ -32,7 +32,12 @@ const HeroSection = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg" className="text-lg px-8 py-4">
+            <Button 
+              variant="hero" 
+              size="lg" 
+              className="text-lg px-8 py-4"
+              onClick={() => window.location.href = '/dashboard'}
+            >
               <BarChart3 className="mr-2 h-5 w-5" />
               Explorar dashboard
             </Button>
