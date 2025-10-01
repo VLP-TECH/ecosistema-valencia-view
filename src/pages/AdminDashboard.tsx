@@ -16,6 +16,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 interface Profile {
   id: string;
   user_id: string;
+  email: string | null;
   first_name: string | null;
   last_name: string | null;
   organization: string | null;
@@ -437,6 +438,7 @@ const AdminDashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Email</TableHead>
                   <TableHead>Nombre</TableHead>
                   <TableHead>Organización</TableHead>
                   <TableHead>Rol</TableHead>
@@ -448,6 +450,9 @@ const AdminDashboard = () => {
               <TableBody>
                 {profiles.map((userProfile) => (
                   <TableRow key={userProfile.id}>
+                    <TableCell className="font-medium">
+                      {userProfile.email || 'Sin email'}
+                    </TableCell>
                     <TableCell>
                       {userProfile.first_name && userProfile.last_name
                         ? `${userProfile.first_name} ${userProfile.last_name}`
