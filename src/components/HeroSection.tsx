@@ -36,7 +36,12 @@ const HeroSection = () => {
               <BarChart3 className="mr-2 h-5 w-5" />
               Explorar dashboard
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 border-white/50 text-primary bg-white/90 hover:bg-white hover:text-primary">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-4 border-white/50 text-primary bg-white/90 hover:bg-white hover:text-primary"
+              onClick={() => window.location.href = '/encuestas'}
+            >
               <Users className="mr-2 h-5 w-5" />
               Participar en encuesta
             </Button>
