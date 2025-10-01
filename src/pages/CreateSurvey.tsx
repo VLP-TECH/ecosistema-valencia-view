@@ -147,7 +147,7 @@ const CreateSurvey = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <NavigationHeader />
 
-      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 mt-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 mt-8">
         <Button
           variant="ghost"
           onClick={() => navigate("/encuestas")}
@@ -157,12 +157,12 @@ const CreateSurvey = () => {
           Volver a encuestas
         </Button>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Crear nueva encuesta</CardTitle>
+        <Card className="shadow-lg">
+          <CardHeader className="pb-8">
+            <CardTitle className="text-4xl">Crear nueva encuesta</CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <CardContent className="px-8 pb-8">
+            <form onSubmit={handleSubmit} className="space-y-10">
               {/* Survey Info */}
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -198,22 +198,22 @@ const CreateSurvey = () => {
               </div>
 
               {/* Questions */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Preguntas</h3>
-                  <Button type="button" onClick={addQuestion} variant="outline" size="sm">
+                  <h3 className="text-2xl font-semibold">Preguntas</h3>
+                  <Button type="button" onClick={addQuestion} variant="outline">
                     <Plus className="mr-2 h-4 w-4" />
                     Añadir pregunta
                   </Button>
                 </div>
 
                 {questions.map((question, qIndex) => (
-                  <Card key={qIndex} className="p-4">
-                    <div className="space-y-4">
+                  <Card key={qIndex} className="p-6 shadow-md border-2">
+                    <div className="space-y-5">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-4">
+                        <div className="flex-1 space-y-5">
                           <div className="space-y-2">
-                            <Label>Pregunta {qIndex + 1} *</Label>
+                            <Label className="text-base font-semibold">Pregunta {qIndex + 1} *</Label>
                             <Input
                               value={question.question_text}
                               onChange={(e) =>
@@ -221,6 +221,7 @@ const CreateSurvey = () => {
                               }
                               placeholder="Texto de la pregunta"
                               required
+                              className="text-base py-6"
                             />
                           </div>
 
