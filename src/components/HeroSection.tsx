@@ -1,9 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BarChart3, TrendingUp, Users, Building } from "lucide-react";
 import heroImage from "@/assets/valencia-artes.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -36,7 +39,7 @@ const HeroSection = () => {
               variant="hero" 
               size="lg" 
               className="text-lg px-8 py-4"
-              onClick={() => window.location.href = '/dashboard'}
+              onClick={() => navigate('/dashboard')}
             >
               <BarChart3 className="mr-2 h-5 w-5" />
               Explorar dashboard
@@ -45,7 +48,7 @@ const HeroSection = () => {
               variant="outline" 
               size="lg" 
               className="text-lg px-8 py-4 border-white/50 text-primary bg-white/90 hover:bg-white hover:text-primary"
-              onClick={() => window.location.href = '/encuestas'}
+              onClick={() => navigate('/encuestas')}
             >
               <Users className="mr-2 h-5 w-5" />
               Participar en encuesta
