@@ -123,11 +123,7 @@ const Surveys = () => {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       <span>
-                        {new Date(survey.created_at).toLocaleDateString("es-ES", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        1 de septiembre
                       </span>
                     </div>
                     <Button
