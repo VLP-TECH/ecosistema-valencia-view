@@ -27,7 +27,11 @@ const NavigationHeader = () => {
         title: "Sesión cerrada",
         description: "Has cerrado sesión exitosamente"
       });
-      window.location.href = '/';
+      // Force complete page reload to clear all state
+      window.location.replace('/');
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       toast({
         title: "Error",
