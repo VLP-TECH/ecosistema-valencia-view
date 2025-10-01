@@ -17,7 +17,7 @@ const NavigationHeader = () => {
     { icon: BarChart3, label: "Dashboard", href: "#dashboard" },
     { icon: FileText, label: "Informes", href: "#reports" },
     { icon: MessageSquare, label: "Encuestas", href: "/encuestas" },
-    { icon: Database, label: "Datos Abiertos", href: "#data" },
+    { icon: Database, label: "Datos Abiertos", href: "/datos-abiertos" },
   ];
 
   const handleSignOut = async () => {
