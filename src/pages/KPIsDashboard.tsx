@@ -2,9 +2,22 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import NavigationHeader from "@/components/NavigationHeader";
 import FooterSection from "@/components/FooterSection";
-import { AlertCircle, TrendingUp } from "lucide-react";
+import { 
+  TrendingUp, 
+  Lightbulb, 
+  GraduationCap, 
+  Users, 
+  Wifi, 
+  Building2, 
+  Leaf, 
+  Briefcase,
+  Download,
+  ArrowUpRight
+} from "lucide-react";
 
 interface KPI {
   dimension: string;
@@ -18,13 +31,66 @@ interface KPI {
   importance: string;
   frequency: string;
   sourceDetail: string;
-  bibliography: string;
+  value?: string;
+  change?: string;
 }
+
+const dimensions = [
+  {
+    id: "emprendimiento",
+    name: "Apoyo al emprendimiento e innovación",
+    icon: Lightbulb,
+    color: "text-primary",
+    bgColor: "bg-primary/10"
+  },
+  {
+    id: "capital-humano",
+    name: "Capital humano",
+    icon: GraduationCap,
+    color: "text-accent",
+    bgColor: "bg-accent/10"
+  },
+  {
+    id: "ecosistema",
+    name: "Ecosistema y colaboración",
+    icon: Users,
+    color: "text-secondary",
+    bgColor: "bg-secondary/10"
+  },
+  {
+    id: "infraestructura",
+    name: "Infraestructura digital",
+    icon: Wifi,
+    color: "text-success",
+    bgColor: "bg-success/10"
+  },
+  {
+    id: "servicios-publicos",
+    name: "Servicios públicos digitales",
+    icon: Building2,
+    color: "text-primary",
+    bgColor: "bg-primary/10"
+  },
+  {
+    id: "sostenibilidad",
+    name: "Sostenibilidad digital",
+    icon: Leaf,
+    color: "text-accent",
+    bgColor: "bg-accent/10"
+  },
+  {
+    id: "transformacion",
+    name: "Transformación digital empresarial",
+    icon: Briefcase,
+    color: "text-secondary",
+    bgColor: "bg-secondary/10"
+  }
+];
 
 const KPIsDashboard = () => {
   const [kpis, setKpis] = useState<KPI[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dimensions, setDimensions] = useState<string[]>([]);
+  const [selectedDimension, setSelectedDimension] = useState(dimensions[0].id);
 
   useEffect(() => {
     loadKPIs();
@@ -37,7 +103,6 @@ const KPIsDashboard = () => {
       const lines = text.split('\n');
       
       const parsedKPIs: KPI[] = [];
-      const uniqueDimensions = new Set<string>();
 
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -45,30 +110,51 @@ const KPIsDashboard = () => {
 
         const values = line.split(';');
         if (values.length >= 13) {
-          const kpi: KPI = {
-            dimension: values[0]?.trim() || '',
-            subdimension: values[1]?.trim() || '',
-            indicator: values[2]?.trim() || '',
-            status: values[3]?.trim() || '',
-            description: values[5]?.trim() || '',
-            formula: values[6]?.trim() || '',
-            data: values[7]?.trim() || '',
-            source: values[8]?.trim() || '',
-            importance: values[9]?.trim() || '',
-            frequency: values[10]?.trim() || '',
-            sourceDetail: values[11]?.trim() || '',
-            bibliography: values[12]?.trim() || ''
-          };
+          const dimensionRaw = values[0]?.trim() || '';
+          
+          // Mapear dimensiones del CSV a nuestras dimensiones
+          let mappedDimension = '';
+          const dimLower = dimensionRaw.toLowerCase();
+          
+          if (dimLower.includes('emprendimiento') || dimLower.includes('innovación') || dimLower.includes('innovacion')) {
+            mappedDimension = 'emprendimiento';
+          } else if (dimLower.includes('capital') || dimLower.includes('humano')) {
+            mappedDimension = 'capital-humano';
+          } else if (dimLower.includes('ecosistema') || dimLower.includes('colaboración') || dimLower.includes('colaboracion')) {
+            mappedDimension = 'ecosistema';
+          } else if (dimLower.includes('infraestructura')) {
+            mappedDimension = 'infraestructura';
+          } else if (dimLower.includes('servicios') || dimLower.includes('públicos') || dimLower.includes('publicos')) {
+            mappedDimension = 'servicios-publicos';
+          } else if (dimLower.includes('sostenibilidad')) {
+            mappedDimension = 'sostenibilidad';
+          } else if (dimLower.includes('transformación') || dimLower.includes('transformacion') || dimLower.includes('empresarial')) {
+            mappedDimension = 'transformacion';
+          }
 
-          if (kpi.dimension) {
+          if (mappedDimension) {
+            const kpi: KPI = {
+              dimension: mappedDimension,
+              subdimension: values[1]?.trim() || '',
+              indicator: values[2]?.trim() || '',
+              status: values[3]?.trim() || '',
+              description: values[5]?.trim() || '',
+              formula: values[6]?.trim() || '',
+              data: values[7]?.trim() || '',
+              source: values[8]?.trim() || '',
+              importance: values[9]?.trim() || '',
+              frequency: values[10]?.trim() || '',
+              sourceDetail: values[11]?.trim() || '',
+              value: values[7]?.trim() || '',
+              change: ''
+            };
+
             parsedKPIs.push(kpi);
-            uniqueDimensions.add(kpi.dimension);
           }
         }
       }
 
       setKpis(parsedKPIs);
-      setDimensions(Array.from(uniqueDimensions));
       setLoading(false);
     } catch (error) {
       console.error('Error loading KPIs:', error);
@@ -76,20 +162,8 @@ const KPIsDashboard = () => {
     }
   };
 
-  const getKPIsByDimension = (dimension: string) => {
-    return kpis.filter(kpi => kpi.dimension === dimension);
-  };
-
-  const getImportanceColor = (importance: string) => {
-    const imp = importance.toLowerCase();
-    if (imp.includes('alta') || imp.includes('high')) return "bg-destructive/10 text-destructive";
-    if (imp.includes('media') || imp.includes('medium')) return "bg-warning/10 text-warning";
-    return "bg-success/10 text-success";
-  };
-
-  const getStatusColor = (status: string) => {
-    if (status.toLowerCase() === 'ok') return "bg-success/10 text-success";
-    return "bg-muted text-muted-foreground";
+  const getKPIsByDimension = (dimensionId: string) => {
+    return kpis.filter(kpi => kpi.dimension === dimensionId);
   };
 
   if (loading) {
@@ -122,120 +196,207 @@ const KPIsDashboard = () => {
           </div>
 
           {/* Tabs por dimensión */}
-          <Tabs defaultValue={dimensions[0]} className="w-full">
+          <Tabs value={selectedDimension} onValueChange={setSelectedDimension} className="w-full">
             <TabsList className="w-full justify-start flex-wrap h-auto mb-8 bg-muted/50 p-2">
               {dimensions.map((dimension) => (
                 <TabsTrigger 
-                  key={dimension} 
-                  value={dimension}
-                  className="text-sm px-4 py-2"
+                  key={dimension.id} 
+                  value={dimension.id}
+                  className="text-sm px-4 py-2 flex items-center gap-2"
                 >
-                  {dimension}
+                  <dimension.icon className="h-4 w-4" />
+                  {dimension.name}
                 </TabsTrigger>
               ))}
             </TabsList>
 
-            {dimensions.map((dimension) => (
-              <TabsContent key={dimension} value={dimension} className="space-y-6">
-                <div className="mb-4">
-                  <h2 className="text-2xl font-bold text-foreground mb-2">{dimension}</h2>
-                  <p className="text-muted-foreground">
-                    Total de indicadores: {getKPIsByDimension(dimension).length}
-                  </p>
-                </div>
-
-                <div className="grid gap-6">
-                  {getKPIsByDimension(dimension).map((kpi, index) => (
-                    <Card key={index} className="p-6 hover:shadow-medium transition-all border-l-4 border-l-primary">
-                      <div className="space-y-4">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {kpi.status && (
-                                <Badge className={getStatusColor(kpi.status)}>
-                                  {kpi.status}
-                                </Badge>
-                              )}
-                              {kpi.importance && (
-                                <Badge className={getImportanceColor(kpi.importance)}>
-                                  {kpi.importance}
-                                </Badge>
-                              )}
-                              {kpi.frequency && (
-                                <Badge variant="outline" className="text-xs">
-                                  {kpi.frequency}
-                                </Badge>
-                              )}
-                            </div>
-                            <h3 className="text-xl font-semibold text-foreground mb-1">
-                              {kpi.indicator}
-                            </h3>
-                            {kpi.subdimension && (
-                              <p className="text-sm text-muted-foreground">
-                                Subdimensión: {kpi.subdimension}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Descripción */}
-                        {kpi.description && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-1">
-                              Descripción
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {kpi.description}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Fórmula */}
-                        {kpi.formula && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-1">
-                              Fórmula de cálculo
-                            </h4>
-                            <p className="text-sm text-muted-foreground font-mono bg-muted/30 p-2 rounded">
-                              {kpi.formula}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Datos */}
-                        {kpi.data && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-1">
-                              Datos
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              {kpi.data}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Footer con fuentes */}
-                        <div className="pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          {kpi.source && (
-                            <div>
-                              <span className="font-medium">Origen: </span>
-                              {kpi.source}
-                            </div>
-                          )}
-                          {kpi.sourceDetail && (
-                            <div>
-                              <span className="font-medium">Fuente: </span>
-                              {kpi.sourceDetail}
-                            </div>
-                          )}
+            {dimensions.map((dimension) => {
+              const dimensionKPIs = getKPIsByDimension(dimension.id);
+              const topKPIs = dimensionKPIs.slice(0, 4);
+              
+              return (
+                <TabsContent key={dimension.id} value={dimension.id} className="space-y-8">
+                  {/* Header con estadísticas */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Card className="p-6 bg-gradient-card border-0">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`p-3 rounded-lg ${dimension.bgColor}`}>
+                          <dimension.icon className={`h-6 w-6 ${dimension.color}`} />
                         </div>
                       </div>
+                      <h3 className="text-3xl font-bold text-foreground mb-1">
+                        {dimensionKPIs.length}
+                      </h3>
+                      <p className="text-muted-foreground text-sm">Total Indicadores</p>
                     </Card>
-                  ))}
-                </div>
-              </TabsContent>
-            ))}
+
+                    {topKPIs.slice(0, 3).map((kpi, idx) => (
+                      <Card key={idx} className="p-6 bg-gradient-card border-0 hover:shadow-medium transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`p-3 rounded-lg ${dimension.bgColor}`}>
+                            <TrendingUp className={`h-6 w-6 ${dimension.color}`} />
+                          </div>
+                          {kpi.status === 'OK' && (
+                            <div className="flex items-center space-x-1 text-success">
+                              <ArrowUpRight className="h-4 w-4" />
+                              <span className="text-sm font-medium">Activo</span>
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="text-lg font-bold text-foreground mb-1 line-clamp-2">
+                          {kpi.indicator}
+                        </h3>
+                        <p className="text-muted-foreground text-sm">{kpi.subdimension || dimension.name}</p>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Lista de indicadores con Progress */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <Card className="p-6 bg-gradient-card border-0">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-semibold text-foreground flex items-center">
+                          <dimension.icon className={`h-5 w-5 mr-2 ${dimension.color}`} />
+                          Indicadores Principales
+                        </h3>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Exportar
+                        </Button>
+                      </div>
+                      <div className="space-y-4">
+                        {dimensionKPIs.slice(0, 6).map((kpi, idx) => (
+                          <div key={idx} className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-foreground font-medium line-clamp-1">
+                                {kpi.indicator}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {kpi.importance || 'N/A'}
+                              </span>
+                            </div>
+                            <Progress value={kpi.status === 'OK' ? 75 : 45} className="h-2" />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-6 bg-gradient-card border-0">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-semibold text-foreground flex items-center">
+                          <TrendingUp className={`h-5 w-5 mr-2 ${dimension.color}`} />
+                          Indicadores Secundarios
+                        </h3>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Exportar
+                        </Button>
+                      </div>
+                      <div className="space-y-4">
+                        {dimensionKPIs.slice(6, 12).map((kpi, idx) => (
+                          <div key={idx} className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-foreground font-medium line-clamp-1">
+                                {kpi.indicator}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {kpi.frequency || 'N/A'}
+                              </span>
+                            </div>
+                            <Progress value={kpi.status === 'OK' ? 65 : 35} className="h-2" />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Detalles de todos los indicadores */}
+                  <div>
+                    <h3 className="text-2xl font-bold text-foreground mb-6">
+                      Todos los Indicadores - {dimension.name}
+                    </h3>
+                    <div className="grid gap-6">
+                      {dimensionKPIs.map((kpi, index) => (
+                        <Card key={index} className="p-6 hover:shadow-medium transition-all border-l-4 border-l-primary">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                  {kpi.status && (
+                                    <Badge className={kpi.status === 'OK' ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}>
+                                      {kpi.status}
+                                    </Badge>
+                                  )}
+                                  {kpi.importance && (
+                                    <Badge className={
+                                      kpi.importance.toLowerCase().includes('alta') ? "bg-destructive/10 text-destructive" :
+                                      kpi.importance.toLowerCase().includes('media') ? "bg-warning/10 text-warning" :
+                                      "bg-success/10 text-success"
+                                    }>
+                                      {kpi.importance}
+                                    </Badge>
+                                  )}
+                                  {kpi.frequency && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {kpi.frequency}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <h4 className="text-xl font-semibold text-foreground mb-1">
+                                  {kpi.indicator}
+                                </h4>
+                                {kpi.subdimension && (
+                                  <p className="text-sm text-muted-foreground">
+                                    Subdimensión: {kpi.subdimension}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {kpi.description && (
+                              <div>
+                                <h5 className="text-sm font-semibold text-foreground mb-1">
+                                  Descripción
+                                </h5>
+                                <p className="text-sm text-muted-foreground">
+                                  {kpi.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {kpi.formula && (
+                              <div>
+                                <h5 className="text-sm font-semibold text-foreground mb-1">
+                                  Fórmula de cálculo
+                                </h5>
+                                <p className="text-sm text-muted-foreground font-mono bg-muted/30 p-2 rounded">
+                                  {kpi.formula}
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="pt-4 border-t flex flex-wrap gap-4 text-xs text-muted-foreground">
+                              {kpi.source && (
+                                <div>
+                                  <span className="font-medium">Origen: </span>
+                                  {kpi.source}
+                                </div>
+                              )}
+                              {kpi.sourceDetail && (
+                                <div>
+                                  <span className="font-medium">Fuente: </span>
+                                  {kpi.sourceDetail}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+              );
+            })}
           </Tabs>
         </div>
       </main>
