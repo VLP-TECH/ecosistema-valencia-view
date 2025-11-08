@@ -9,6 +9,15 @@ export default defineConfig(({ mode }) => ({
     host: "0.0.0.0",
     port: 8080,
     strictPort: false,
+    allowedHosts: [
+      "web-app-camara-valen.rzd02y.easypanel.host",
+      "web-app-camara-vlc.rzd02y.easypanel.host",
+      "web-app-valencia-camara.rzd02y.easypanel.host",
+      "localhost",
+      "127.0.0.1",
+      ".easypanel.host",
+    ],
+    cors: true,
   },
   preview: {
     host: "0.0.0.0",
