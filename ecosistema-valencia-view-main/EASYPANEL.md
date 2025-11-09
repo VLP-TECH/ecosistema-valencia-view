@@ -134,3 +134,4 @@ ERROR: resolve : lstat .../https:: no such file or directory
 - El Dockerfile usa multi-stage build para optimizar el tamaño
 - La aplicación corre en el puerto **4173** por defecto
 
+
